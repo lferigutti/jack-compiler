@@ -1,11 +1,11 @@
-from vm_translator.src.models import CommandType, ArithmeticCommandTypes, MemoryCommand, MemorySymbol
+from vm_translator.src.models import CommandType, ArithmeticCommandTypes, MemoryCommand, MemorySegment
 
 
 class Command:
   def __init__(
       self,
       command_type: CommandType,
-      arg1: ArithmeticCommandTypes | MemorySymbol,
+      arg1: ArithmeticCommandTypes | MemorySegment,
       arg2: None | int = None
   ):
     self.command_type = command_type
@@ -23,19 +23,19 @@ class Command:
 
   def __repr__(self):
     return f"Command(command_type={self.command_type!r}, arg1={self.arg1!r}, arg2={self.arg2!r})"
-  
+
   def __eq__(self, value):
-     if not isinstance(value, Command):
-         return False
-     return (self.command_type == value.command_type and
-             self.arg1 == value.arg1 and
-             self.arg2 == value.arg2)
+    if not isinstance(value, Command):
+      return False
+    return (self.command_type == value.command_type and
+            self.arg1 == value.arg1 and
+            self.arg2 == value.arg2)
 
   def is_arithmetic(self):
-      return self.command_type == CommandType.ARITHMETIC
-  
+    return self.command_type == CommandType.ARITHMETIC
+
   def is_push(self):
-      return self.command_type == CommandType.PUSH
+    return self.command_type == CommandType.PUSH
 
   def is_pop(self):
-      return self.command_type == CommandType.POP
+    return self.command_type == CommandType.POP

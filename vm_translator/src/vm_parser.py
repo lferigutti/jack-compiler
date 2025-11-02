@@ -1,5 +1,5 @@
 from vm_translator.src.command import Command
-from vm_translator.src.models import CommandType, ArithmeticCommandTypes, MemoryCommand, MemorySymbol
+from vm_translator.src.models import CommandType, ArithmeticCommandTypes, MemoryCommand, MemorySegment
 from typing import List
 from pathlib import Path
 
@@ -34,7 +34,7 @@ class Parser:
     elif len(args) == 3:
       try:
         command_type = self._get_memory_type(args[0])
-        arg1 = MemorySymbol(args[1])
+        arg1 = MemorySegment(args[1])
         arg2 = int(args[2])
         return Command(
           command_type=command_type,

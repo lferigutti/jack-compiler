@@ -24,7 +24,7 @@ class CommandType(Enum):
   POP = 'pop'
 
 
-class MemorySymbol(Enum):
+class MemorySegment(Enum):
   SP = 'SP'
   LCL = 'local'
   ARG = 'argument'

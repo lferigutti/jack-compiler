@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from vm_translator.src.vm_parser import Parser
 from vm_translator.src.command import Command
-from vm_translator.src.models import CommandType, ArithmeticCommandTypes, MemorySymbol
+from vm_translator.src.models import CommandType, ArithmeticCommandTypes, MemorySegment
 
 
 class TestParser(unittest.TestCase):
@@ -38,7 +38,7 @@ class TestParser(unittest.TestCase):
 
     self.assertEqual(len(commands), 1)
     self.assertEqual(commands[0].command_type, CommandType.PUSH)
-    self.assertEqual(commands[0].arg1, MemorySymbol.CONSTANT)
+    self.assertEqual(commands[0].arg1, MemorySegment.CONSTANT)
     self.assertEqual(commands[0].arg2, 7)
 
   def test_parse_pop_command(self):
@@ -49,7 +49,7 @@ class TestParser(unittest.TestCase):
 
     self.assertEqual(len(commands), 1)
     self.assertEqual(commands[0].command_type, CommandType.POP)
-    self.assertEqual(commands[0].arg1, MemorySymbol.LCL)
+    self.assertEqual(commands[0].arg1, MemorySegment.LCL)
     self.assertEqual(commands[0].arg2, 0)
 
   def test_parse_multiple_commands(self):

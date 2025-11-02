@@ -6,7 +6,9 @@ import argparse
 import sys
 from pathlib import Path
 
+from vm_translator.src.code_writer import CodeWriter
 from vm_translator.src.vm_parser import Parser
+from vm_translator.src.vm_translator_class import VMTranslator
 
 
 def main():
@@ -47,14 +49,17 @@ def main():
 
   print(f"Input: {input_path}")
   print(f"Output: {output_path}")
-  translate(input_path)
+  translate(input_path, output_path)
 
 
-def translate(input_file: Path):
+def translate(input_path: Path, output_path):
   print("Starting the Translation")
-  parser = Parser(input_file)
+  parser = Parser(input_path)
   parsed_file = parser.parse()
-  print(parsed_file)
+  translator = VMTranslator()
+  translation = translator.translate(parsed_file)
+  code_writer = CodeWriter(output_file=output_path)
+  code_writer.write_file(translation)
 
 
 if __name__ == '__main__':
