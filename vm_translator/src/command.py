@@ -34,8 +34,20 @@ class Command:
   def is_arithmetic(self):
     return self.command_type == CommandType.ARITHMETIC
 
+  def is_add(self):
+    return self.arg1 == ArithmeticCommandTypes.ADD
+
   def is_push(self):
     return self.command_type == CommandType.PUSH
 
   def is_pop(self):
     return self.command_type == CommandType.POP
+
+  def is_constant_segment(self):
+    return self.arg1 == MemorySegment.CONSTANT
+
+  def is_common_segment(self):
+    """
+    Returns true if the segment is {local, arg, this, that}. This is useful  for translation.
+    """
+    return self.arg1 == MemorySegment.LCL or self.arg1 == MemorySegment.ARG or self.arg1 == MemorySegment.THIS or self.arg1 == MemorySegment.THAT
