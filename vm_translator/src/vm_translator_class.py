@@ -31,8 +31,12 @@ class VMTranslator:
       return self._translate_pop_command(command)
     elif command.is_branching():
       return self._translate_branching_commands(command)
+    elif command.is_function():
+      return self._translate_function_command(command)
+    elif command.is_return():
+      return self._translate_return_command(command)
     else:
-      raise NotImplemented(f"Command {command.command_type} not implemented yet.")
+      raise SyntaxError(f"Command {command.command_type.value} not implemented yet.")
 
   def _translate_arithmetic_command(self, command: Command) -> List[str]:
     if command.is_add():
@@ -97,3 +101,47 @@ class VMTranslator:
       return ["@SP", "AM=M-1", "D=M", f"@{label}", "D;JNE"]
     else:
       raise SyntaxError(f"Branching Command '{str(command)}' is not valid.")
+
+  def _translate_function_command(self, command: Command) -> List[str]:
+    function_name = command.arg1
+    n_vars = int(command.arg2)
+
+    def _push_local_vars(n_local_vars: int):
+      if n_local_vars < 0:
+        raise SyntaxError(f"Number of variables cannot be lower than 0. You input {n_local_vars}")
+
+      if n_local_vars == 0:
+        return []
+      elif n_local_vars == 1:
+        return ["@LCL", "A=M", "M=0"]
+      else:
+        return ["A=A+1", "M=0"]
+
+    assembly_commands = [f"({function_name})"]
+    for i in range(1, n_vars + 1):
+      assembly_commands.extend(_push_local_vars(i))
+
+    return assembly_commands
+
+  def _translate_return_command(self, command: Command) -> List[str]:
+
+    # endFrame = LCL
+    assembly_command = ["@LCL", "D=M", "@R13", "M=D"]
+    # retAddr = *(endFrame - 5)
+    assembly_command.extend(["@5", "D=D-A", "@R14", "M=D"])
+    # *ARG = pop()
+    assembly_command.extend(["@SP", "A=M-1", "D=M", "@ARG", "A=M", "M=D", "D=A"])
+    # SP = ARG +1
+    assembly_command.extend(["@SP", "M=D+1"])
+    # THAT = *(endFrame - 1)
+    assembly_command.extend(["@R13", "A=M-1", "D=M", "@THAT", "M=D"])
+    # THIS = *(endFrame - 2)
+    assembly_command.extend(["@R13", "D=M", "@2", "A=D-A", "D=M", "@THIS", "M=D"])
+    # ARG = *(endFrame - 3)
+    assembly_command.extend(["@R13", "D=M", "@3", "A=D-A", "D=M", "@ARG", "M=D"])
+    # LCL = *(endFrame - 4)
+    assembly_command.extend(["@R13", "D=M", "@4", "A=D-A", "D=M", "@LCL", "M=D"])
+    # goto retAddr
+    assembly_command.extend(["@R14", "A=M", "0;JMP"])
+
+    return assembly_command
