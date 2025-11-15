@@ -35,6 +35,8 @@ class VMTranslator:
       return self._translate_function_command(command)
     elif command.is_return():
       return self._translate_return_command(command)
+    elif command.is_call():
+      return self._translate_call_command(command)
     else:
       raise SyntaxError(f"Command {command.command_type.value} not implemented yet.")
 
@@ -106,20 +108,15 @@ class VMTranslator:
     function_name = command.arg1
     n_vars = int(command.arg2)
 
-    def _push_local_vars(n_local_vars: int):
-      if n_local_vars < 0:
-        raise SyntaxError(f"Number of variables cannot be lower than 0. You input {n_local_vars}")
-
-      if n_local_vars == 0:
-        return []
-      elif n_local_vars == 1:
-        return ["@LCL", "A=M", "M=0"]
-      else:
-        return ["A=A+1", "M=0"]
-
     assembly_commands = [f"({function_name})"]
-    for i in range(1, n_vars + 1):
-      assembly_commands.extend(_push_local_vars(i))
+
+    if n_vars < 0:
+      raise SyntaxError(f"Number of variables cannot be lower than 0. You input {n_vars}")
+    elif n_vars == 0:
+      return assembly_commands
+    else:
+      for i in range(1, n_vars + 1):
+        assembly_commands.extend(["@SP", "M=M+1", "A=M-1", "M=0"])
 
     return assembly_commands
 
@@ -128,7 +125,7 @@ class VMTranslator:
     # endFrame = LCL
     assembly_command = ["@LCL", "D=M", "@R13", "M=D"]
     # retAddr = *(endFrame - 5)
-    assembly_command.extend(["@5", "D=D-A", "@R14", "M=D"])
+    assembly_command.extend(["@5", "A=D-A", "D=M", "@R14", "M=D"])
     # *ARG = pop()
     assembly_command.extend(["@SP", "A=M-1", "D=M", "@ARG", "A=M", "M=D", "D=A"])
     # SP = ARG +1
@@ -143,5 +140,27 @@ class VMTranslator:
     assembly_command.extend(["@R13", "D=M", "@4", "A=D-A", "D=M", "@LCL", "M=D"])
     # goto retAddr
     assembly_command.extend(["@R14", "A=M", "0;JMP"])
+
+    return assembly_command
+
+  def _translate_call_command(self, command: Command) -> List[str]:
+    self.label_counter += 1
+    function_name = command.arg1
+    return_address = f"RETURN_{function_name}_{self.label_counter}"
+    # 5 - nVar
+    arg_pos = 5 + command.arg2
+    # push returnAddress
+    assembly_command = [f"@{return_address}", "D=A", "@SP", "M=M+1", "A=M-1", "M=D"]
+    # push LCL, ARG, THIS, THAT
+    for seg in ["LCL", "ARG", "THIS", "THAT"]:
+      assembly_command.extend([f"@{seg}", "D=M", "@SP", "M=M+1", "A=M-1", "M=D"])
+    # ARG = SP - 5 - nArgs
+    assembly_command.extend(["@SP", "D=M", f"@{arg_pos}", "D=D-A", "@ARG", "M=D"])
+    # LCL = SP
+    assembly_command.extend(["@SP", "D=M", "@LCL", "M=D"])
+    # goto functionName
+    assembly_command.extend([f"@{function_name}", "0;JMP"])
+    # (returnAddress)
+    assembly_command.extend([f"({return_address})"])
 
     return assembly_command
