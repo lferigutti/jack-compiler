@@ -2,15 +2,29 @@ from typing import List
 
 from vm_translator.src.command import Command
 from vm_translator.src.assembly_expressions import AssemblyExpressions
-from vm_translator.src.models import BranchingCommand
+from vm_translator.src.models import BranchingCommand, CommandType
 
 
 class VMTranslator:
   assembly_expressions = AssemblyExpressions()
 
-  def __init__(self, file_name: str):
+  def __init__(self, file_name: str = "NoFileNameGiven"):
     self.label_counter = 0
     self.file_name = file_name
+
+  def get_bootstrap_code(self, stack_init_position: int = 256, write_comment: bool = True):
+    if stack_init_position < 0:
+      raise SyntaxError("The stack cannot start in a negative memory slot.")
+
+    # Add comment
+    assembly_code = ["// bootstrap code"]
+    # SP = stack_init_position
+    assembly_code.extend([f"@{stack_init_position}", "D=A", "@SP", "M=D"])
+    # Call Sys.init 0
+    vm_code = Command(command_type=CommandType.CALL, arg1="Sys.init", arg2=0)
+    assembly_code.extend(self._translate_call_command(vm_code))
+
+    return assembly_code
 
   def translate(self, commands: List[Command], write_comment: bool = True) -> List[str]:
     output = []

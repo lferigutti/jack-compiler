@@ -91,12 +91,27 @@ def get_file_name(input_path: Path):
   return input_path.name.split(".")[0]
 
 
+def get_files_from_dir(input_path: Path):
+  return list(input_path.glob("*.vm"))
+
+
 def translate(input_path: Path, output_path):
-  file_name = get_file_name(input_path)
-  parser = Parser(input_path)
-  parsed_file = parser.parse()
-  translator = VMTranslator(file_name=file_name)
-  translation = translator.translate(parsed_file)
+  if input_path.is_dir():
+    files = get_files_from_dir(input_path)
+  else:
+    files = [input_path]
+
+  translation = []
+  if len(files) >= 1:
+    translator_init = VMTranslator()
+    translation.extend(translator_init.get_bootstrap_code())
+  for file in files:
+    parser = Parser(file)
+    file_name = get_file_name(file)
+    parsed_file = parser.parse()
+    translator = VMTranslator(file_name=file_name)
+    translation.extend(translator.translate(parsed_file))
+
   code_writer = CodeWriter(output_file=output_path)
   code_writer.write_file(translation)
 
