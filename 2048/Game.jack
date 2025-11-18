@@ -2,20 +2,113 @@ class Game {
   field Board board; // Board of the game itself
   field int size; // Size of the board. Hardcoded by now
   field int initScreenRow, initScreenCol; // Initical position of the board in the screen
+  field Array cellStrings; // Pre-built strings for drawing cells
 
   constructor Game new() {
     let size = 4;
     let board = Board.new(size);
     let initScreenRow = 6;
     let initScreenCol = 20;
+    do initCellStrings();
     return this;
+  }
+
+  /* Pre-build all strings needed to render the cells to avoid runtime allocations */
+  method void initCellStrings() {
+    let cellStrings = Array.new(15);
+
+    let cellStrings[0] = createCellString(32, 32, 32, 32, 32);
+    let cellStrings[1] = createCellString(32, 32, 50, 32, 32);
+    let cellStrings[2] = createCellString(32, 32, 52, 32, 32);
+    let cellStrings[3] = createCellString(32, 32, 56, 32, 32);
+    let cellStrings[4] = createCellString(32, 49, 54, 32, 32);
+    let cellStrings[5] = createCellString(32, 51, 50, 32, 32);
+    let cellStrings[6] = createCellString(32, 54, 52, 32, 32);
+    let cellStrings[7] = createCellString(32, 49, 50, 56, 32);
+    let cellStrings[8] = createCellString(32, 50, 53, 54, 32);
+    let cellStrings[9] = createCellString(32, 53, 49, 50, 32);
+    let cellStrings[10] = createCellString(49, 48, 50, 52, 32);
+    let cellStrings[11] = createCellString(50, 48, 52, 56, 32);
+    let cellStrings[12] = createCellString(52, 48, 57, 54, 32);
+    let cellStrings[13] = createCellString(56, 49, 57, 50, 32);
+    let cellStrings[14] = createCellString(32, 69, 82, 82, 32);
+    return;
+  }
+
+  method String createCellString(int c1, int c2, int c3, int c4, int c5) {
+    var String s;
+    let s = String.new(5);
+    do s.appendChar(c1);
+    do s.appendChar(c2);
+    do s.appendChar(c3);
+    do s.appendChar(c4);
+    do s.appendChar(c5);
+    return s;
   }
 
   /* Here is the logic of the game */
   method void run() {
+    var char key;
+    var boolean exit, moved;
+    
+    let key = 0;
+    
+    do board.addRandomTile();
+    do board.addRandomTile();
     do draw();
+    
+    let exit = false;
+    
+    while (~exit) {
+
+      while (key = 0) {
+        let key = Keyboard.keyPressed();
+      }
+   
+      let moved = handleMove(key); 
+
+      if (moved) {
+        do board.addRandomTile();
+        do draw();
+        // TODO: Check for win/lose conditions
+      }
+      
+      // Check for exit
+      if (key = 140) { // ESC key
+        let exit = true;
+      }
+      
+      // Wait for key release
+      while (~(key = 0)) {
+        let key = Keyboard.keyPressed();
+      }
+    }
+    
     return;
   }
+
+  /* Handle a move based on key pressed. Returns true if board changed. */
+  method boolean handleMove(char key) {
+    var boolean moved;
+    
+    let moved = false;
+    
+    if (key = 130) { // Left arrow
+      let moved = board.moveLeft();
+    }
+    if (key = 131) { // Up arrow
+      let moved = board.moveUp();
+    }
+    if (key = 132) { // Right arrow
+      let moved = board.moveRight();
+    }
+    if (key = 133) { // Down arrow
+      let moved = board.moveDown();
+    }
+    
+    return moved;
+  }
+
 
   /* This method is in charge of undestanding where to draw and what to draw. */
   method void draw() {
@@ -27,8 +120,7 @@ class Game {
     let screenCol = initScreenCol;
 
     while (rowIndex < size) {
-      do Output.moveCursor(screenRow, screenCol);
-      do Output.printString("+-----+-----+-----+-----+");
+      do drawHorizontalBorder(screenRow, screenCol);
       let screenRow = screenRow + 1;
       do drawRow(rowIndex, screenRow, screenCol);
       let rowIndex = rowIndex + 1;
@@ -36,25 +128,38 @@ class Game {
     }
     
     // Draw last line
+    do drawHorizontalBorder(screenRow, screenCol);
+    return;
+  }
+
+  method void drawHorizontalBorder(int screenRow, int screenCol) {
+    var int col, dashCount;
     do Output.moveCursor(screenRow, screenCol);
-    do Output.printString("+-----+-----+-----+-----+");
+    let col = 0;
+    while (col < size) {
+      do Output.printChar(43); // '+'
+      let dashCount = 0;
+      while (dashCount < 5) {
+        do Output.printChar(45); // '-'
+        let dashCount = dashCount + 1;
+      }
+      let col = col + 1;
+    }
+    do Output.printChar(43);
     return;
   }
 
   /* This method draws only one row */
   method void drawRow(int rowIndex, int screenRow, int screenCol) {
     var int col, value;
-    var String cellStr;
 
     do Output.moveCursor(screenRow, screenCol);
-    do Output.printString("|");
+    do Output.printChar(124); // '|'
     let col = 0;
     while (col < size) {
       let value = board.get(rowIndex, col);
-      let cellStr = getCellString(value);
-
-      do Output.printString(cellStr);
-      do Output.printString("|");
+      do Output.printString(getCellString(value));
+      do Output.printChar(124);
       
       let col = col + 1;
     }
@@ -66,48 +171,69 @@ class Game {
   method String getCellString(int value) {
 
     if (value = 0) {
-      return "     ";
+      return cellStrings[0];
     }
     if (value = 2) {
-      return "  2  ";
+      return cellStrings[1];
     }
     if (value = 4) {
-      return "  4  ";
+      return cellStrings[2];
     }
     if (value = 8) {
-      return "  8  ";
+      return cellStrings[3];
     }
     if (value = 16) {
-      return " 16  ";
+      return cellStrings[4];
     }
     if (value = 32) {
-      return " 32  ";
+      return cellStrings[5];
     }
     if (value = 64) {
-      return " 64  ";
+      return cellStrings[6];
     }
     if (value = 128) {
-      return " 128 ";
+      return cellStrings[7];
     }
     if (value = 256) {
-      return " 256 ";
+      return cellStrings[8];
     }  
     if (value = 512) {
-      return " 512 ";
+      return cellStrings[9];
     }
     if (value = 1024) {
-      return "1024 ";
+      return cellStrings[10];
     }  
     if (value = 2048) {
-      return "2048 ";
+      return cellStrings[11];
     }
-    return "     ";
+    if (value = 4096) {
+      return cellStrings[12];
+    }
+    if (value = 8192) {
+      return cellStrings[13];
+    }
+    // For any other value, return ERR to indicate overflow
+    return cellStrings[14];
   }
 
   /** Disposes this game */
   method void dispose() {
+    do disposeCellStrings();
     do board.dispose();
     do Memory.deAlloc(this);
+    return;
+  }
+
+  method void disposeCellStrings() {
+    var int i;
+    var String cellStr;
+    let i = 0;
+    while (i < 15) {
+      let cellStr = cellStrings[i];
+      do cellStr.dispose();
+      let i = i + 1;
+    }
+    do Memory.deAlloc(cellStrings);
     return;
   }
 

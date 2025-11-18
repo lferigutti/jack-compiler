@@ -1,5 +1,5 @@
 function Board.new 1
-    push constant 2
+    push constant 4
     call Memory.alloc 1
     pop pointer 0
     push argument 0
@@ -7,6 +7,11 @@ function Board.new 1
     push argument 0
     call Array.new 1
     pop this 0
+    push constant 12345
+    pop this 2
+    push argument 0
+    call Array.new 1
+    pop this 3
     push constant 0
     pop local 0
 label Board_0
@@ -75,46 +80,693 @@ function Board.set 1
     pop that 0
     push constant 0
     return
-function Board.initTestData 0
+function Board.random 0
+    push argument 0
+    pop pointer 0
+    push this 2
+    push constant 11312
+    call Math.multiply 2
+    push constant 12345
+    add
+    pop this 2
+    push this 2
+    push constant 0
+    lt
+    not
+    if-goto Board_3
+    push this 2
+    neg
+    pop this 2
+    goto Board_2
+label Board_3
+label Board_2
+    push this 2
+    push this 2
+    push argument 1
+    call Math.divide 2
+    push argument 1
+    call Math.multiply 2
+    sub
+    return
+function Board.addRandomTile 6
+    push argument 0
+    pop pointer 0
+    push constant 2
+    pop local 0
+    push constant 0
+    pop local 3
+    push constant 0
+    pop local 1
+label Board_4
+    push local 1
+    push this 1
+    lt
+    not
+    if-goto Board_5
+    push constant 0
+    pop local 2
+label Board_6
+    push local 2
+    push this 1
+    lt
+    not
+    if-goto Board_7
+    push pointer 0
+    push local 1
+    push local 2
+    call Board.get 3
+    push constant 0
+    eq
+    not
+    if-goto Board_9
+    push local 3
+    push constant 1
+    add
+    pop local 3
+    goto Board_8
+label Board_9
+label Board_8
+    push local 2
+    push constant 1
+    add
+    pop local 2
+    goto Board_6
+label Board_7
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_4
+label Board_5
+    push local 3
+    push constant 0
+    eq
+    not
+    if-goto Board_11
+    push constant 0
+    return
+    goto Board_10
+label Board_11
+label Board_10
+    push pointer 0
+    push local 3
+    call Board.random 2
+    pop local 4
+    push constant 0
+    pop local 5
+    push constant 0
+    pop local 1
+label Board_12
+    push local 1
+    push this 1
+    lt
+    not
+    if-goto Board_13
+    push constant 0
+    pop local 2
+label Board_14
+    push local 2
+    push this 1
+    lt
+    not
+    if-goto Board_15
+    push pointer 0
+    push local 1
+    push local 2
+    call Board.get 3
+    push constant 0
+    eq
+    not
+    if-goto Board_17
+    push local 5
+    push local 4
+    eq
+    not
+    if-goto Board_19
+    push pointer 0
+    push local 1
+    push local 2
+    push local 0
+    call Board.set 4
+    pop temp 0
+    push constant 0
+    return
+    goto Board_18
+label Board_19
+label Board_18
+    push local 5
+    push constant 1
+    add
+    pop local 5
+    goto Board_16
+label Board_17
+label Board_16
+    push local 2
+    push constant 1
+    add
+    pop local 2
+    goto Board_14
+label Board_15
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_12
+label Board_13
+    push constant 0
+    return
+function Board.moveLeft 6
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 4
+    push constant 0
+    pop local 0
+label Board_20
+    push local 0
+    push this 1
+    lt
+    not
+    if-goto Board_21
+    push local 0
+    push this 0
+    add
+    pop pointer 1
+    push that 0
+    pop local 5
+    push constant 0
+    pop local 1
+label Board_22
+    push local 1
+    push this 1
+    lt
+    not
+    if-goto Board_23
+    push local 1
+    push this 3
+    add
+    push constant 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_22
+label Board_23
+    push constant 1
+    pop local 1
+label Board_24
+    push local 1
+    push this 1
+    lt
+    not
+    if-goto Board_25
+    push local 1
+    push local 5
+    add
+    pop pointer 1
+    push that 0
+    pop local 3
+    push local 3
+    push constant 0
+    eq
+    not
+    not
+    if-goto Board_27
+    push local 1
+    pop local 2
+label Board_28
+    push local 2
+    push constant 0
+    gt
+    push local 2
+    push constant 1
+    sub
+    push local 5
+    add
+    pop pointer 1
+    push that 0
+    push constant 0
+    eq
+    and
+    not
+    if-goto Board_29
+    push local 2
+    push constant 1
+    sub
+    pop local 2
+    goto Board_28
+label Board_29
+    push local 2
+    push constant 0
+    gt
+    not
+    if-goto Board_31
+    push local 2
+    push constant 1
+    sub
+    push local 5
+    add
+    pop pointer 1
+    push that 0
+    push local 3
+    eq
+    push local 2
+    push constant 1
+    sub
+    push this 3
+    add
+    pop pointer 1
+    push that 0
+    not
+    and
+    not
+    if-goto Board_33
+    push local 2
+    push constant 1
+    sub
+    push local 5
+    add
+    push local 3
+    push local 3
+    add
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 1
+    push local 5
+    add
+    push constant 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 2
+    push constant 1
+    sub
+    push this 3
+    add
+    push constant 1
+    neg
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    neg
+    pop local 4
+    goto Board_32
+label Board_33
+    push local 2
+    push local 1
+    eq
+    not
+    not
+    if-goto Board_35
+    push local 2
+    push local 5
+    add
+    push local 3
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 1
+    push local 5
+    add
+    push constant 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    neg
+    pop local 4
+    goto Board_34
+label Board_35
+label Board_34
+label Board_32
+    goto Board_30
+label Board_31
+    push local 2
+    push local 1
+    eq
+    not
+    not
+    if-goto Board_37
+    push local 2
+    push local 5
+    add
+    push local 3
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 1
+    push local 5
+    add
+    push constant 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push constant 1
+    neg
+    pop local 4
+    goto Board_36
+label Board_37
+label Board_36
+label Board_30
+    goto Board_26
+label Board_27
+label Board_26
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_24
+label Board_25
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Board_20
+label Board_21
+    push local 4
+    return
+function Board.rotateClockwise 5
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 0
+label Board_38
+    push local 0
+    push this 1
+    lt
+    not
+    if-goto Board_39
+    push local 0
+    push constant 1
+    add
+    pop local 1
+label Board_40
+    push local 1
+    push this 1
+    lt
+    not
+    if-goto Board_41
+    push pointer 0
+    push local 0
+    push local 1
+    call Board.get 3
+    pop local 2
+    push pointer 0
+    push local 0
+    push local 1
+    push pointer 0
+    push local 1
+    push local 0
+    call Board.get 3
+    call Board.set 4
+    pop temp 0
+    push pointer 0
+    push local 1
+    push local 0
+    push local 2
+    call Board.set 4
+    pop temp 0
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_40
+label Board_41
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Board_38
+label Board_39
+    push constant 0
+    pop local 0
+label Board_42
+    push local 0
+    push this 1
+    lt
+    not
+    if-goto Board_43
+    push constant 0
+    pop local 1
+    push local 0
+    push this 0
+    add
+    pop pointer 1
+    push that 0
+    pop local 3
+label Board_44
+    push local 1
+    push this 1
+    push constant 2
+    call Math.divide 2
+    lt
+    not
+    if-goto Board_45
+    push local 1
+    push local 3
+    add
+    pop pointer 1
+    push that 0
+    pop local 2
+    push local 1
+    push local 3
+    add
+    push this 1
+    push constant 1
+    sub
+    push local 1
+    sub
+    push local 3
+    add
+    pop pointer 1
+    push that 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push this 1
+    push constant 1
+    sub
+    push local 1
+    sub
+    push local 3
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_44
+label Board_45
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Board_42
+label Board_43
+    push constant 0
+    return
+function Board.rotateCounterClockwise 4
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 0
+label Board_46
+    push local 0
+    push this 1
+    lt
+    not
+    if-goto Board_47
+    push constant 0
+    pop local 1
+    push local 0
+    push this 0
+    add
+    pop pointer 1
+    push that 0
+    pop local 3
+label Board_48
+    push local 1
+    push this 1
+    push constant 2
+    call Math.divide 2
+    lt
+    not
+    if-goto Board_49
+    push local 1
+    push local 3
+    add
+    pop pointer 1
+    push that 0
+    pop local 2
+    push local 1
+    push local 3
+    add
+    push this 1
+    push constant 1
+    sub
+    push local 1
+    sub
+    push local 3
+    add
+    pop pointer 1
+    push that 0
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push this 1
+    push constant 1
+    sub
+    push local 1
+    sub
+    push local 3
+    add
+    push local 2
+    pop temp 0
+    pop pointer 1
+    push temp 0
+    pop that 0
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_48
+label Board_49
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Board_46
+label Board_47
+    push constant 0
+    pop local 0
+label Board_50
+    push local 0
+    push this 1
+    lt
+    not
+    if-goto Board_51
+    push local 0
+    push constant 1
+    add
+    pop local 1
+label Board_52
+    push local 1
+    push this 1
+    lt
+    not
+    if-goto Board_53
+    push pointer 0
+    push local 0
+    push local 1
+    call Board.get 3
+    pop local 2
+    push pointer 0
+    push local 0
+    push local 1
+    push pointer 0
+    push local 1
+    push local 0
+    call Board.get 3
+    call Board.set 4
+    pop temp 0
+    push pointer 0
+    push local 1
+    push local 0
+    push local 2
+    call Board.set 4
+    pop temp 0
+    push local 1
+    push constant 1
+    add
+    pop local 1
+    goto Board_52
+label Board_53
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    goto Board_50
+label Board_51
+    push constant 0
+    return
+function Board.moveRight 1
     push argument 0
     pop pointer 0
     push pointer 0
-    push constant 0
-    push constant 0
-    push constant 2
-    call Board.set 4
+    call Board.rotateClockwise 1
     pop temp 0
     push pointer 0
-    push constant 0
-    push constant 1
-    push constant 4
-    call Board.set 4
+    call Board.rotateClockwise 1
     pop temp 0
     push pointer 0
-    push constant 0
-    push constant 2
-    push constant 8
-    call Board.set 4
+    call Board.moveLeft 1
+    pop local 0
+    push pointer 0
+    call Board.rotateClockwise 1
     pop temp 0
     push pointer 0
-    push constant 0
-    push constant 3
-    push constant 16
-    call Board.set 4
+    call Board.rotateClockwise 1
     pop temp 0
-    push constant 0
+    push local 0
+    return
+function Board.moveUp 1
+    push argument 0
+    pop pointer 0
+    push pointer 0
+    call Board.rotateCounterClockwise 1
+    pop temp 0
+    push pointer 0
+    call Board.moveLeft 1
+    pop local 0
+    push pointer 0
+    call Board.rotateClockwise 1
+    pop temp 0
+    push local 0
+    return
+function Board.moveDown 1
+    push argument 0
+    pop pointer 0
+    push pointer 0
+    call Board.rotateClockwise 1
+    pop temp 0
+    push pointer 0
+    call Board.moveLeft 1
+    pop local 0
+    push pointer 0
+    call Board.rotateCounterClockwise 1
+    pop temp 0
+    push local 0
     return
 function Board.dispose 1
     push argument 0
     pop pointer 0
     push constant 0
     pop local 0
-label Board_2
+label Board_54
     push local 0
     push this 1
     lt
     not
-    if-goto Board_3
+    if-goto Board_55
     push local 0
     push this 0
     add
@@ -126,9 +778,12 @@ label Board_2
     push constant 1
     add
     pop local 0
-    goto Board_2
-label Board_3
+    goto Board_54
+label Board_55
     push this 0
+    call Memory.deAlloc 1
+    pop temp 0
+    push this 3
     call Memory.deAlloc 1
     pop temp 0
     push pointer 0

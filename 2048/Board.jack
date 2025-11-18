@@ -1,13 +1,16 @@
 class Board {
   field Array board; // Array that would represent the board
   field int size; // Size of the square board usually 4x4
+  field int seed; // Seed for pseudo-random number generation
+  field Array mergedFlags; // Reusable array for tracking merges
 
   constructor Board new (int boardSize) {
     var int i;
     let size = boardSize;
     let board = Array.new(boardSize);
+    let seed = 12345; // Initial seed value
+    let mergedFlags = Array.new(boardSize); // Allocate once
 
-    // Create each row (all elements automatically initialized to 0)
     let i = 0;
     while (i < size) {
       let board[i] = Array.new(size);
@@ -34,6 +37,226 @@ class Board {
     return;
   }
 
+  /* Simple pseudo-random number generator */
+  method int random(int max) {
+    let seed = (seed * 11312) + 12345;
+    if (seed < 0) {
+      let seed = -seed;
+    }
+    return seed - ((seed / max) * max);
+  }
+
+  /* Set a random tile in the screen */
+  method void addRandomTile() {
+    var int value, row, col, emptyCount, targetIndex, currentIndex;
+    
+    // TODO: Implement randomness btw 2 and 4.
+    let value = 2;
+    
+    // Count empty positions
+    let emptyCount = 0;
+    let row = 0;
+    while (row < size) {
+      let col = 0;
+      while (col < size) {
+        if (get(row, col) = 0) {
+          let emptyCount = emptyCount + 1;
+        }
+        let col = col + 1;
+      }
+      let row = row + 1;
+    }
+    
+    // If no empty positions, return
+    if (emptyCount = 0) {
+      return;
+    }
+    
+    // Choose a random empty position
+    let targetIndex = random(emptyCount);
+    let currentIndex = 0;
+    
+    let row = 0;
+    while (row < size) {
+      let col = 0;
+      while (col < size) {
+        if (get(row, col) = 0) {
+          if (currentIndex = targetIndex) {
+            do set(row, col, value);
+            return;
+          }
+          let currentIndex = currentIndex + 1;
+        }
+        let col = col + 1;
+      }
+      let row = row + 1;
+    }
+    
+    return;
+  }
+
+  /* This is the hear of moving, we are moving to the left always so we avoid copy pasting the method. Tricky part is to roteate/tilt the 
+    board when we want to move to another direction.
+  */
+  method boolean moveLeft() {
+    var int row, col, targetCol, value;
+    var boolean moved;
+    var Array rowArray;
+    
+    let moved = false;
+    let row = 0;
+    
+    while (row < size) {
+      let rowArray = board[row];
+      
+
+      let col = 0;
+      while (col < size) {
+        let mergedFlags[col] = false;
+        let col = col + 1;
+      }
+      
+
+      let col = 1;
+      while (col < size) {
+        let value = rowArray[col];
+        
+        if (~(value = 0)) {
+          let targetCol = col;
+          
+
+          while ((targetCol > 0) & (rowArray[targetCol - 1] = 0)) {
+            let targetCol = targetCol - 1;
+          }
+          
+
+          if (targetCol > 0) {
+            if ((rowArray[targetCol - 1] = value) & (~mergedFlags[targetCol - 1])) {
+              let rowArray[targetCol - 1] = value + value;
+              let rowArray[col] = 0;
+              let mergedFlags[targetCol - 1] = true;
+              let moved = true;
+            } else {
+              if (~(targetCol = col)) {
+                let rowArray[targetCol] = value;
+                let rowArray[col] = 0;
+                let moved = true;
+              }
+            }
+          } else {
+            if (~(targetCol = col)) {
+              let rowArray[targetCol] = value;
+              let rowArray[col] = 0;
+              let moved = true;
+            }
+          }
+        }
+        
+        let col = col + 1;
+      }
+      
+      let row = row + 1;
+    }
+    
+    return moved;
+  }
+
+  /* Rotate board 90 degrees clockwise - in place using transpose + reverse */
+  method void rotateClockwise() {
+    var int row, col, temp;
+    var Array rowArray1, rowArray2;
+    
+    // Transpose: swap board[row][col] with board[col][row]
+    let row = 0;
+    while (row < size) {
+      let col = row + 1;
+      while (col < size) {
+        let temp = get(row, col);
+        do set(row, col, get(col, row));
+        do set(col, row, temp);
+        let col = col + 1;
+      }
+      let row = row + 1;
+    }
+    
+    // Reverse each row
+    let row = 0;
+    while (row < size) {
+      let col = 0;
+      let rowArray1 = board[row];
+      while (col < (size / 2)) {
+        let temp = rowArray1[col];
+        let rowArray1[col] = rowArray1[size - 1 - col];
+        let rowArray1[size - 1 - col] = temp;
+        let col = col + 1;
+      }
+      let row = row + 1;
+    }
+    
+    return;
+  }
+
+  /* Rotate board 90 degrees counter-clockwise - in place using reverse + transpose */
+  method void rotateCounterClockwise() {
+    var int row, col, temp;
+    var Array rowArray1;
+    
+    // Reverse each row first
+    let row = 0;
+    while (row < size) {
+      let col = 0;
+      let rowArray1 = board[row];
+      while (col < (size / 2)) {
+        let temp = rowArray1[col];
+        let rowArray1[col] = rowArray1[size - 1 - col];
+        let rowArray1[size - 1 - col] = temp;
+        let col = col + 1;
+      }
+      let row = row + 1;
+    }
+    
+    // Transpose: swap board[row][col] with board[col][row]
+    let row = 0;
+    while (row < size) {
+      let col = row + 1;
+      while (col < size) {
+        let temp = get(row, col);
+        do set(row, col, get(col, row));
+        do set(col, row, temp);
+        let col = col + 1;
+      }
+      let row = row + 1;
+    }
+    
+    return;
+  }
+
+  method boolean moveRight() {
+    var boolean moved;
+    do rotateClockwise();
+    do rotateClockwise();
+    let moved = moveLeft();
+    do rotateClockwise();
+    do rotateClockwise();
+    return moved;
+  }
+
+  method boolean moveUp() {
+    var boolean moved;
+    do rotateCounterClockwise();
+    let moved = moveLeft();
+    do rotateClockwise();
+    return moved;
+  }
+
+  method boolean moveDown() {
+    var boolean moved;
+    do rotateClockwise();
+    let moved = moveLeft();
+    do rotateCounterClockwise();
+    return moved;
+  }
+ 
 
   /** Disposes this board */
   method void dispose() {
@@ -44,6 +267,7 @@ class Board {
       let i = i + 1;
     }
     do Memory.deAlloc(board);
+    do Memory.deAlloc(mergedFlags);
     do Memory.deAlloc(this);
     return;
   }
